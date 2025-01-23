@@ -2,6 +2,8 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
 
+import axios from "axios";
+
 // Path
 import Header from "../components/Header";
 
@@ -11,7 +13,6 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 
-
 const Login = () => {
 
   // const useState = React.useState();
@@ -19,23 +20,38 @@ const Login = () => {
 
   const [loggedIn, setLoggedIn] = useState(false)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     var username = event.target.username.value;
     var password = event.target.password.value;
     console.log(username + '\n ' + password);
   
     // Pass data to backend
-  
+    var pathname = "http://localhost:3000"
+    try {
+      const res = await axios.post(`${pathname}/login`, { username, password });
+      console.log(res.data);
+      setLoggedIn(true)
+      // navigate(`/`)
+    } catch (error) {
+      console.error('Error: ', error);
+    }
+
+    // if (res.data.status === 200) {
+    //   console.log('Redirect from client side')
+    //   // navigate(`/`)
+    // }
+
+
     // Route to Application upon successful authentication
-    navigate(`/`)
+    // navigate(`/`)
   
   }
   
   
   return (
     <div>
-      <Header loginState={!loggedIn} />
+      <Header loginState={loggedIn} />
 
       <Box
         alignItems="center"
