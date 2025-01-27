@@ -8,6 +8,26 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
 
 
+async function verifyToken(token) {
+    // If no token is provided, return an error
+    if (!token) {
+        return res.status(403).json({ error: 'No token provided' });
+    }
+    
+    // Verify the token using the secret key 
+    // (using promise-based version of jwt.verify)
+    const decoded = await new Promise((resolve, reject) => {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                return reject(new Error('Failed to authenticate token'));
+            } else {
+                return resolve(decoded);
+            }
+        });
+    });
+}
+
+
 // Function to hash the password
 function hashPassword(password, callback) {
     bcrypt.genSalt(10, (err, salt) => {
@@ -29,31 +49,40 @@ const getAllUsers = async (req, res) => {
     // Extract the token from the cookies
     const token = req.cookies.authToken;
 
-    // If no token is provided, return an error
-    if (!token) {
-        return res.status(403).json({ error: 'No token provided' });
-    }
+    verifyToken(token)
+
+    // // If no token is provided, return an error
+    // if (!token) {
+    //     return res.status(403).json({ error: 'No token provided' });
+    // }
     
-    // Verify the token using the secret key 
-    // (using promise-based version of jwt.verify)
-    const decoded = await new Promise((resolve, reject) => {
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            if (err) {
-                reject(new Error('Failed to authenticate token'));
-            } else {
-                resolve(decoded);
-            }
-        });
-    });
+    // // Verify the token using the secret key 
+    // // (using promise-based version of jwt.verify)
+    // const decoded = await new Promise((resolve, reject) => {
+    //     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    //         if (err) {
+    //             reject(new Error('Failed to authenticate token'));
+    //         } else {
+    //             resolve(decoded);
+    //         }
+    //     });
+    // });
 
     try {
         const [users] = await promisePool.query(`
             SELECT u.user_username, u.user_email, u.user_enabled, 
-                   COALESCE(g.user_group_groupName, '') AS user_group_groupName
+                   GROUP_CONCAT(COALESCE(g.user_group_groupName, '') SEPARATOR ',') AS user_groups
             FROM users u
             LEFT JOIN user_group g ON u.user_username = g.user_group_username
+            GROUP BY u.user_username, u.user_email, u.user_enabled
         `);
-        console.log(users, "USERSSSSSS")
+        // console.log(users, "USERSSSSSS")
+
+        const transformedUsers = users.map(user => {
+            // Split the comma-separated group names into an array
+            user.user_groups = user.user_groups ? user.user_groups.split(',') : [];
+            return user;
+        });
         res.json(users);
     } catch (error) {
         console.error('Error fetching users:', error);
