@@ -32,20 +32,10 @@ const Login = () => {
       const res = await axios.post(`${pathname}/login`, { username, password });
       console.log(res.data);
       setLoggedIn(true)
-      // navigate(`/`)
+      navigate(`/`)
     } catch (error) {
       console.error('Error: ', error);
     }
-
-    // if (res.data.status === 200) {
-    //   console.log('Redirect from client side')
-    //   // navigate(`/`)
-    // }
-
-
-    // Route to Application upon successful authentication
-    // navigate(`/`)
-  
   }
   
   
