@@ -22,6 +22,26 @@ function hashPassword(password, callback) {
 }
 
 const getAllUsers = async (req, res) => {
+    // Extract the token from the cookies
+    const token = req.cookies.authToken;
+
+    // If no token is provided, return an error
+    if (!token) {
+        return res.status(403).json({ error: 'No token provided' });
+    }
+    
+    // Verify the token using the secret key 
+    // (using promise-based version of jwt.verify)
+    const decoded = await new Promise((resolve, reject) => {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                reject(new Error('Failed to authenticate token'));
+            } else {
+                resolve(decoded);
+            }
+        });
+    });
+
     try {
         const [users] = await promisePool.query(`
             SELECT u.user_username, u.user_email, u.user_enabled, 
