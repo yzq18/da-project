@@ -3,10 +3,10 @@
 // and managing web servers in Node.js.
 const express = require('express');
 
-// imports the Express session middleware, 
-// which allows you to manage user sessions, 
-// such as login sessions, in your application.
-const session = require('express-session');
+// // imports the Express session middleware, 
+// // which allows you to manage user sessions, 
+// // such as login sessions, in your application.
+// const session = require('express-session');
 
 // imports the Body Parser middleware, 
 // which helps parse incoming request bodies in a middleware 
@@ -25,6 +25,9 @@ const cors = require("cors");
 //     origin: ["http://localhost:5173/"],
 // };
 
+// Import cookie-parser
+const cookieParser = require('cookie-parser');
+
 
 // Import APIs from routers folder
 const login = require('./routers/loginRouter');
@@ -33,9 +36,10 @@ const user = require('./routers/userRouter');
 
 const app = express();
 app.use(express.json());
-app.use(session({secret: 'super-secret'}));
+// app.use(session({secret: 'super-secret'}));
 
 app.use(cors())
+app.use(cookieParser())
 
 app.use(login);
 app.use(user);

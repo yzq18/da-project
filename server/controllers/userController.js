@@ -4,6 +4,10 @@ const promisePool = require('../connectDB');
 // Import for hashing password
 const bcrypt = require('bcrypt')
 
+// Import the jwt module
+const jwt = require('jsonwebtoken');
+
+
 // Function to hash the password
 function hashPassword(password, callback) {
     bcrypt.genSalt(10, (err, salt) => {
